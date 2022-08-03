@@ -33,12 +33,19 @@ class App extends React.Component {
     },
   };
 
-  componentDidMount() {
+  onFileChange = (e) => {
+    const files = e.target.files;
+    files.length > 0 &&
+      this.setState({ fileURL: URL.createObjectURL(files[0]) }, () => {
+        this.loadFile();
+      });
+  };
+
+  // componentDidMount() {
+  loadFile = () => {
     const { documentZoom } = this.state;
 
-    PdfJs.getDocument(
-      'https://uploads.codesandbox.io/uploads/user/faa4155a-f802-458d-81ad-90b4709d0cf8/4ETB-10.1.1.324.5566.pdf'
-    ).promise.then((pdf) => {
+    PdfJs.getDocument(this.state.fileURL).promise.then((pdf) => {
       pdf.getPage(1).then((page) => {
         let content = page
           .getTextContent()
@@ -60,7 +67,7 @@ class App extends React.Component {
           });
       });
     });
-  }
+  };
 
   render() {
     return (
@@ -69,6 +76,7 @@ class App extends React.Component {
         tabIndex={0}
         style={{ width: '460px', height: '600px' }}
       >
+        <input type="file" accept=".pdf" onChange={this.onFileChange} />
         {this.state.pdfContent}
       </div>
     );
