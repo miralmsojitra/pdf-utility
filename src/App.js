@@ -46,14 +46,25 @@ class App extends React.Component {
 
     this.state.pdfData.map(async (cPage) => {
       console.log('--cPage--', cPage);
-      let npage = await pdfDoc1.getPage(cPage.pageNumber - 1);
-      // let cropDiamentions = [0, 0, cPage.width, cPage.cropTop];
-      npage.setCropBox(
-        0,
-        cPage.cropTop,
-        cPage.width,
-        cPage.height - cPage.cropTop
-      );
+      if (cPage.cropTop) {
+        let npage = await pdfDoc1.getPage(cPage.pageNumber - 1);
+        // let cropDiamentions = [0, 0, cPage.width, cPage.cropTop];
+        npage.drawText(cPage.skuString, {
+          size: 10,
+          x: cPage.width - 200,
+          y: cPage.cropTop + 20,
+          // x: cPage.width - 100,
+          // y: cPage.cropTop - 20,
+        });
+        npage.setCropBox(
+          0,
+          cPage.cropTop,
+          cPage.width,
+          cPage.height - cPage.cropTop
+        );
+      } else {
+        pdfDoc1.removePage(cPage.pageNumber - 1);
+      }
     });
 
     // npage.setCropBox(0, 0, 250, 500);
@@ -106,8 +117,13 @@ class App extends React.Component {
         page.getTextContent().then((dt) => {
           console.log('--', dt);
           let foldfromItem = dt.items.filter((a) => {
-            // console.log(a.str === 'Fold Here');
             return a.str === 'Fold Here';
+          })[0];
+          let skuString = null;
+          dt.items.map((a, idx) => {
+            if (a.str === 'SKU:') {
+              skuString = dt.items[idx + 1].str + dt.items[idx + 2].str;
+            }
           })[0];
           console.log('--foldfromItem-', foldfromItem);
           this.state.pdfData.push({
@@ -115,7 +131,8 @@ class App extends React.Component {
             height: page.view[3],
             width: page.view[2],
             // items: dt.items,
-            cropTop: foldfromItem ? foldfromItem?.transform[5] : 1,
+            skuString,
+            cropTop: foldfromItem ? foldfromItem?.transform[5] : null,
           });
         });
       });
