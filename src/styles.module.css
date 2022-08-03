@@ -1,0 +1,82 @@
+:global(.pdfViewer .page) {
+  border: none;
+  border-image: none;
+}
+
+:global(input[type='text']) {
+  width: 100%;
+  padding: 0.5rem;
+  margin: 8px 0;
+  box-sizing: border-box;
+}
+
+.viewer {
+  background-color: #f9f9f9;
+  border-radius: 2px;
+  box-shadow: 0px 0px 0px 1px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: box-shadow 150ms linear;
+  outline: none;
+  padding: 1px;
+}
+
+.header {
+  display: flex;
+  padding: 8px;
+}
+
+.content {
+  display: flex;
+  flex: 3;
+}
+
+.viewer:hover {
+  box-shadow: 0px 0px 0px 2px rgba(0, 0, 139, 0.2);
+}
+
+.viewer:active,
+.viewer:focus {
+  box-shadow: 0px 0px 0px 2px rgba(0, 0, 139, 0.5);
+}
+
+.document {
+  display: flex;
+  font-family: sans-serif;
+  line-height: 20px;
+  flex: 3;
+  flex-direction: column;
+  padding: 0px;
+}
+
+.scroller {
+  overflow-y: scroll !important;
+}
+
+.scroller::-webkit-scrollbar-track {
+  background-color: #cccccc;
+}
+
+.scroller::-webkit-scrollbar {
+  width: 4px;
+  background-color: #cccccc;
+}
+
+.scroller::-webkit-scrollbar-thumb {
+  background-color: #a9a9a9;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+}
+
+.select {
+  position: fixed !important;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: 300px;
+}
