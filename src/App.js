@@ -51,8 +51,8 @@ class App extends React.Component {
         // let cropDiamentions = [0, 0, cPage.width, cPage.cropTop];
         npage.drawText(cPage.skuString, {
           size: 10,
-          x: cPage.width - 200,
-          y: cPage.cropTop + 20,
+          x: cPage.width - 150,
+          y: cPage.cropTop + 10,
           // x: cPage.width - 100,
           // y: cPage.cropTop - 20,
         });
@@ -63,7 +63,7 @@ class App extends React.Component {
           cPage.height - cPage.cropTop
         );
       } else {
-        pdfDoc1.removePage(cPage.pageNumber - 1);
+        // pdfDoc1.removePage(cPage.pageNumber - 1);
       }
     });
 
@@ -132,7 +132,7 @@ class App extends React.Component {
             width: page.view[2],
             // items: dt.items,
             skuString,
-            cropTop: foldfromItem ? foldfromItem?.transform[5] : null,
+            cropTop: foldfromItem ? foldfromItem?.transform[5] : 1,
           });
         });
       });
