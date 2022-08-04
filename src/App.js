@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import * as PdfJs from 'pdfjs-dist';
 import { FixedSizeList as Document } from 'react-window';
 import { PDFDocument } from 'pdf-lib';
-
+import axios from 'axios';
 import DocumentView from './DocumentView.js';
 import DocumentSize from './DocumentMeasure';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
@@ -34,6 +34,31 @@ class App extends React.Component {
     },
     pdfItems: [],
     pdfData: [],
+  };
+
+  doFileUpload = () => {
+    // Create an object of formData
+    const formData = new FormData();
+
+    // Update the formData object
+    formData.append('file', this.state.file, this.state.file.name);
+
+    // Details of the uploaded file
+    console.log(this.state.file);
+
+    // Request made to the backend api
+    // Send formData object
+    axios
+      .post(
+        'https://express-simple-tfa1hn--3010.local.webcontainer.io/upload',
+        formData
+      )
+      .then((dt) => {
+        console.log('--dt--', dt);
+      })
+      .catch((er) => {
+        console.log('--er--', er);
+      });
   };
 
   saveFile = async () => {
@@ -82,27 +107,30 @@ class App extends React.Component {
   onFileChange = (e) => {
     const files = e.target.files;
     files.length > 0 &&
-      this.setState({ fileURL: URL.createObjectURL(files[0]) }, async () => {
-        // const arrayBuffer = await fetch(URL.createObjectURL(files[0])).then(
-        //   (res) => res.arrayBuffer()
-        // );
-        // console.log('--', arrayBuffer);
-        // const pdfDoc1 = await PDFDocument.load(arrayBuffer);
+      this.setState(
+        { fileURL: URL.createObjectURL(files[0]), file: files[0] },
+        async () => {
+          // const arrayBuffer = await fetch(URL.createObjectURL(files[0])).then(
+          //   (res) => res.arrayBuffer()
+          // );
+          // console.log('--', arrayBuffer);
+          // const pdfDoc1 = await PDFDocument.load(arrayBuffer);
 
-        // let npage = await pdfDoc1.getPage(0);
-        // npage.setCropBox(0, 0, 250, 500);
-        // // console.log(pdfDoc1);
-        // const pdfBytes = await pdfDoc1.save();
+          // let npage = await pdfDoc1.getPage(0);
+          // npage.setCropBox(0, 0, 250, 500);
+          // // console.log(pdfDoc1);
+          // const pdfBytes = await pdfDoc1.save();
 
-        // var blob = new Blob([pdfBytes], { type: 'application/pdf' });
-        // var link = document.createElement('a');
-        // link.href = window.URL.createObjectURL(blob);
-        // link.download = 'myFileName.pdf';
-        // link.click();
+          // var blob = new Blob([pdfBytes], { type: 'application/pdf' });
+          // var link = document.createElement('a');
+          // link.href = window.URL.createObjectURL(blob);
+          // link.download = 'myFileName.pdf';
+          // link.click();
 
-        // console.log(pdfBytes);
-        this.loadFile();
-      });
+          // console.log(pdfBytes);
+          this.loadFile();
+        }
+      );
   };
 
   generatePdfData = (pdf) => {
@@ -183,6 +211,7 @@ class App extends React.Component {
     return (
       <div className={styles.viewer} tabIndex={0}>
         <input type="file" accept=".pdf" onChange={this.onFileChange} />
+        <button onClick={this.doFileUpload}> test </button>
         {this.state.pdfData
           .sort(function (a, b) {
             return b.pagenum - a.pagenum;
