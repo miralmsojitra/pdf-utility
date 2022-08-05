@@ -5,8 +5,6 @@ import * as PdfJs from 'pdfjs-dist';
 import { FixedSizeList as Document } from 'react-window';
 import { PDFDocument } from 'pdf-lib';
 import axios from 'axios';
-import DocumentView from './DocumentView.js';
-import DocumentSize from './DocumentMeasure';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
 // import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.js';
 
@@ -49,10 +47,7 @@ class App extends React.Component {
     // Request made to the backend api
     // Send formData object
     axios
-      .post(
-        'https://express-simple-tfa1hn--3010.local.webcontainer.io/upload',
-        formData
-      )
+      .post('https://brain.quickaitools.com/upload', formData)
       .then((dt) => {
         console.log('--dt--', dt);
       })
