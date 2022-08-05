@@ -38,25 +38,20 @@ class App extends React.Component {
     // Create an object of formData
     const formData = new FormData();
 
-    // Update the formData object
     formData.append('file', this.state.file, this.state.file.name);
 
-    // Details of the uploaded file
-    console.log(this.state.file);
-
-    // Request made to the backend api
-    // Send formData object
     axios
-      .post('https://brain.quickaitools.com/upload', formData)
-      .then((dt) => {
-        console.log('--dt--', dt);
+      .post('http://localhost:3010/upload', formData)
+      .then((resp) => {
+        console.log('--dt--', resp.data.data);
+        this.saveFile(resp.data.data);
       })
       .catch((er) => {
         console.log('--er--', er);
       });
   };
 
-  saveFile = async () => {
+  saveFile = async (cropData) => {
     console.log('---test---');
     const arrayBuffer = await fetch(this.state.fileURL).then((res) =>
       res.arrayBuffer()
@@ -64,7 +59,7 @@ class App extends React.Component {
     // console.log('--', arrayBuffer);
     const pdfDoc1 = await PDFDocument.load(arrayBuffer);
 
-    this.state.pdfData.map(async (cPage) => {
+    cropData.map(async (cPage) => {
       console.log('--cPage--', cPage);
       if (cPage.cropTop) {
         let npage = await pdfDoc1.getPage(cPage.pageNumber - 1);
@@ -105,102 +100,84 @@ class App extends React.Component {
       this.setState(
         { fileURL: URL.createObjectURL(files[0]), file: files[0] },
         async () => {
-          // const arrayBuffer = await fetch(URL.createObjectURL(files[0])).then(
-          //   (res) => res.arrayBuffer()
-          // );
-          // console.log('--', arrayBuffer);
-          // const pdfDoc1 = await PDFDocument.load(arrayBuffer);
-
-          // let npage = await pdfDoc1.getPage(0);
-          // npage.setCropBox(0, 0, 250, 500);
-          // // console.log(pdfDoc1);
-          // const pdfBytes = await pdfDoc1.save();
-
-          // var blob = new Blob([pdfBytes], { type: 'application/pdf' });
-          // var link = document.createElement('a');
-          // link.href = window.URL.createObjectURL(blob);
-          // link.download = 'myFileName.pdf';
-          // link.click();
-
-          // console.log(pdfBytes);
-          this.loadFile();
+          this.doFileUpload();
         }
       );
   };
 
-  generatePdfData = (pdf) => {
-    let numPages = pdf._pdfInfo.numPages;
-    // let pdfPages = []
-    console.log('-numPages-', numPages);
-    Array.from(Array(numPages).keys()).map((pagenum) => {
-      let pageNumber = pagenum + 1;
-      console.log('-pageNumber--', pageNumber);
-      pdf.getPage(pageNumber).then((page) => {
-        console.log('-page-', page);
-        page.getTextContent().then((dt) => {
-          console.log('--', dt);
-          let foldfromItem = dt.items.filter((a) => {
-            return a.str === 'Fold Here';
-          })[0];
-          let skuString = null;
-          dt.items.map((a, idx) => {
-            if (a.str === 'SKU:') {
-              skuString = dt.items[idx + 1].str + dt.items[idx + 2].str;
-            }
-          })[0];
-          console.log('--foldfromItem-', foldfromItem);
-          this.state.pdfData.push({
-            pageNumber,
-            height: page.view[3],
-            width: page.view[2],
-            // items: dt.items,
-            skuString,
-            cropTop: foldfromItem ? foldfromItem?.transform[5] : 1,
-          });
-        });
-      });
-    });
-    setTimeout(() => {
-      this.saveFile();
-    }, 3000);
-  };
+  // generatePdfData = (pdf) => {
+  //   let numPages = pdf._pdfInfo.numPages;
+  //   // let pdfPages = []
+  //   console.log('-numPages-', numPages);
+  //   Array.from(Array(numPages).keys()).map((pagenum) => {
+  //     let pageNumber = pagenum + 1;
+  //     console.log('-pageNumber--', pageNumber);
+  //     pdf.getPage(pageNumber).then((page) => {
+  //       console.log('-page-', page);
+  //       page.getTextContent().then((dt) => {
+  //         console.log('--', dt);
+  //         let foldfromItem = dt.items.filter((a) => {
+  //           return a.str === 'Fold Here';
+  //         })[0];
+  //         let skuString = null;
+  //         dt.items.map((a, idx) => {
+  //           if (a.str === 'SKU:') {
+  //             skuString = dt.items[idx + 1].str + dt.items[idx + 2].str;
+  //           }
+  //         })[0];
+  //         console.log('--foldfromItem-', foldfromItem);
+  //         this.state.pdfData.push({
+  //           pageNumber,
+  //           height: page.view[3],
+  //           width: page.view[2],
+  //           // items: dt.items,
+  //           skuString,
+  //           cropTop: foldfromItem ? foldfromItem?.transform[5] : 1,
+  //         });
+  //       });
+  //     });
+  //   });
+  //   setTimeout(() => {
+  //     this.saveFile();
+  //   }, 3000);
+  // };
 
   // componentDidMount() {
-  loadFile = () => {
-    const { documentZoom } = this.state;
+  // loadFile = () => {
+  //   const { documentZoom } = this.state;
 
-    PdfJs.getDocument(this.state.fileURL).promise.then((pdf) => {
-      this.generatePdfData(pdf);
-      console.log(pdf);
-      // console.log(pdf._pdfInfo.numPages);
+  //   PdfJs.getDocument(this.state.fileURL).promise.then((pdf) => {
+  //     this.generatePdfData(pdf);
+  //     console.log(pdf);
+  //     // console.log(pdf._pdfInfo.numPages);
 
-      // pdf.getPage(1).then((page) => {
-      //   // console.log();
-      //   this.state.documentSize.height = page.view[3];
-      //   this.state.documentSize.width = page.view[2];
+  //     // pdf.getPage(1).then((page) => {
+  //     //   // console.log();
+  //     //   this.state.documentSize.height = page.view[3];
+  //     //   this.state.documentSize.width = page.view[2];
 
-      //   let content = page
-      //     .getTextContent()
-      //     .then((dt) => {
-      //       console.log('--', dt);
-      //       this.state.pdfItems = dt.items;
-      //       let cont = '';
-      //       dt.items.map((i) => {
-      //         cont = cont + ' ' + i.str;
-      //         // console.log(i.str);
-      //       });
-      //       return cont;
-      //     })
-      //     .then((content) => {
-      //       console.log('--cont--', content);
-      //       this.setState({
-      //         documentBody: pdf,
-      //         pdfContent: content,
-      //       });
-      //     });
-      // });
-    });
-  };
+  //     //   let content = page
+  //     //     .getTextContent()
+  //     //     .then((dt) => {
+  //     //       console.log('--', dt);
+  //     //       this.state.pdfItems = dt.items;
+  //     //       let cont = '';
+  //     //       dt.items.map((i) => {
+  //     //         cont = cont + ' ' + i.str;
+  //     //         // console.log(i.str);
+  //     //       });
+  //     //       return cont;
+  //     //     })
+  //     //     .then((content) => {
+  //     //       console.log('--cont--', content);
+  //     //       this.setState({
+  //     //         documentBody: pdf,
+  //     //         pdfContent: content,
+  //     //       });
+  //     //     });
+  //     // });
+  //   });
+  // };
 
   render() {
     return (
