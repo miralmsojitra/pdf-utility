@@ -80,7 +80,7 @@ class App extends React.Component {
               if (cPage.skuString) {
                 npage.drawText(cPage.skuString + ' (' + cPage.qty + ' )', {
                   size: 10,
-                  x: cPage.width - 150,
+                  x: cPage.width - 200,
                   y: cPage.cropTop + 10,
                   // x: cPage.width - 100,
                   // y: cPage.cropTop - 20,
@@ -90,7 +90,7 @@ class App extends React.Component {
                 0,
                 cPage.cropTop,
                 cPage.width,
-                cPage.height - cPage.cropTop
+                cPage.height - cPage.cropTop - 30
               );
               newPdfDoc.addPage(npage);
               resolve(true);
