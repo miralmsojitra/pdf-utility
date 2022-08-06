@@ -39,9 +39,11 @@ class App extends React.Component {
     const formData = new FormData();
 
     formData.append('file', this.state.file, this.state.file.name);
+    let apiURL = 'http://localhost:3010/upload';
+    // let apiURL = 'https://brain.quickaitools.com/upload';
 
     axios
-      .post('http://localhost:3010/upload', formData)
+      .post(apiURL, formData)
       .then((resp) => {
         console.log('--dt--', resp.data.data);
         this.saveFile(resp.data.data);
@@ -58,40 +60,66 @@ class App extends React.Component {
     );
     // console.log('--', arrayBuffer);
     const pdfDoc1 = await PDFDocument.load(arrayBuffer);
+    const newPdfDoc = await PDFDocument.create();
 
-    cropData.map(async (cPage) => {
-      console.log('--cPage--', cPage);
-      if (cPage.cropTop) {
-        let npage = await pdfDoc1.getPage(cPage.pageNumber - 1);
-        // let cropDiamentions = [0, 0, cPage.width, cPage.cropTop];
-        npage.drawText(cPage.skuString, {
-          size: 10,
-          x: cPage.width - 150,
-          y: cPage.cropTop + 10,
-          // x: cPage.width - 100,
-          // y: cPage.cropTop - 20,
-        });
-        npage.setCropBox(
-          0,
-          cPage.cropTop,
-          cPage.width,
-          cPage.height - cPage.cropTop
-        );
-      } else {
-        // pdfDoc1.removePage(cPage.pageNumber - 1);
-      }
+    Promise.all(
+      cropData
+        .sort(function (a, b) {
+          return b.pageNumber - a.pageNumber;
+        })
+        .map((cPage) => {
+          return new Promise(async (resolve, reject) => {
+            console.log('--cPage--', cPage.skuString);
+            if (cPage.cropTop) {
+              console.log('--Label--', cPage.cropTop);
+              // let npage = await pdfDoc1.getPage(cPage.pageNumber - 1);
+              const [npage] = await newPdfDoc.copyPages(pdfDoc1, [
+                cPage.pageNumber - 1,
+              ]);
+              // let cropDiamentions = [0, 0, cPage.width, cPage.cropTop];
+              if (cPage.skuString) {
+                npage.drawText(cPage.skuString + ' (' + cPage.qty + ' )', {
+                  size: 10,
+                  x: cPage.width - 150,
+                  y: cPage.cropTop + 10,
+                  // x: cPage.width - 100,
+                  // y: cPage.cropTop - 20,
+                });
+              }
+              npage.setCropBox(
+                0,
+                cPage.cropTop,
+                cPage.width,
+                cPage.height - cPage.cropTop
+              );
+              newPdfDoc.addPage(npage);
+              resolve(true);
+            } else {
+              console.log('--Extra-page--', 'delete');
+              resolve(true);
+              // pdfDoc1.removePage(cPage.pageNumber - 1);
+            }
+          });
+        })
+    ).then(async (dt) => {
+      const pdfBytes = await newPdfDoc.save();
+      var blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      var link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = 'quickAItools-' + Date.now() + '-' + this.state.file.name; //'myFileName.pdf';
+      link.click();
     });
 
     // npage.setCropBox(0, 0, 250, 500);
 
-    setTimeout(async () => {
-      const pdfBytes = await pdfDoc1.save();
-      var blob = new Blob([pdfBytes], { type: 'application/pdf' });
-      var link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = 'myFileName.pdf';
-      link.click();
-    }, 3000);
+    // setTimeout(async () => {
+    //   const pdfBytes = await pdfDoc1.save();
+    //   var blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    //   var link = document.createElement('a');
+    //   link.href = window.URL.createObjectURL(blob);
+    //   link.download = 'myFileName.pdf';
+    //   link.click();
+    // }, 3000);
   };
 
   onFileChange = (e) => {
